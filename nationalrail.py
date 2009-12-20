@@ -70,7 +70,7 @@ class nationalrail:
             if not crs or len(crs) != 3:
                 print "CRS is mandatory for %s call" %api.__name__
                 sys.exit(1)
-            api(*args, **kwargs)
+            return api(*args, **kwargs)
         return func
         
     def __init__(self):
@@ -89,13 +89,44 @@ class nationalrail:
         @param filterType: To indicate if the filterCrs is a from or to station. Default to.
         @param timeOffset: Time offset in 
         """
-        result = doSoapCall("GetDepartureBoardRequest", locals()) 
-        print result
+        return doSoapCall("GetDepartureBoardRequest", locals())
+
+    @mandatory
+    def arrivals(self, numRows=5, crs="", filterCrs="", filterType="to", timeOffset=0):
+        """
+        Method to retrieve the arrival details to a station specified by crs.
+        @param numRows: Number of rows to be returned
+        @param crs: CRS code of the station.
+        @param filterCrs: CRS code of an intermediate station to filter the result.
+        @param filterType: To indicate if the filterCrs is a from or to station. Default to.
+        @param timeOffset: Time offset in 
+        """
+        return doSoapCall("GetArrivalBoardRequest", locals())
+
+    @mandatory
+    def arrivalsAndDeparture(self, numRows=5, crs="", filterCrs="", filterType="to", timeOffset=0):
+        """
+        Method to retrieve the arrival and departure details of a station specified by crs.
+        @param numRows: Number of rows to be returned
+        @param crs: CRS code of the station.
+        @param filterCrs: CRS code of an intermediate station to filter the result.
+        @param filterType: To indicate if the filterCrs is a from or to station. Default to.
+        @param timeOffset: Time offset in 
+        """
+        return doSoapCall("GetArrivalDepartureBoardRequest", locals())
     
-            
+    def serviceDetails(self, serviceID):
+        """
+        Method to retrieve details about a particular service.
+        @param serviceID: Service ID (Identifier representing a train service) obtained from other api.        
+        """
+        return doSoapCall("GetServiceDetailsRequest", locals())
+                
 def main():
     rail = nationalrail()
-    rail.departures(crs="PAD")
+    print rail.departures(crs="PAD", filterCrs="STL")
+    print rail.arrivals(crs="HAY")
+    print rail.arrivalsAndDeparture(crs="PAD")
         
 if __name__ == '__main__':
     main()
