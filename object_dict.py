@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # object_dict
 # Thunder Chen<nkchenz@gmail.com> 2007
 # Provided as-is; use at your own risk; no warranty; no promises; enjoy!

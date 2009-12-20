@@ -1,4 +1,4 @@
-#!/usr/local/bin/python25
+#!/usr/bin/env python
 # Thunder Chen<nkchenz@gmail.com> 2007.9.1
 # 
 #
