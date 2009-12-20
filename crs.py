@@ -34,13 +34,30 @@ def recreateDB():
         os.remove(CRS_SQLITE_DB)
     conn = sqlite3.connect(CRS_SQLITE_DB)
     c = conn.cursor()
-    c.execute('''CREATE TABLE crs(station_name text, crs text UNIQUE)''')
+    c.execute('''CREATE TABLE crstab(station_name text, crs text UNIQUE)''')
     conn.commit()
     c.close()
+    conn.close()
+
+def getCRS(stationName):
+    """
+    Method to get CRS code for the give station name. This method may not
+    scale nicely for a production environment. Use a proper DB instead.
     
+    @param stationName: Some characters for the station name.
+    """
+    conn = sqlite3.connect(CRS_SQLITE_DB)
+    c = conn.cursor()
+    c.execute('SELECT * from crstab where station_name like "%%%s%%"' %stationName.lower())
+    ret = c.fetchall()
+    c.close()
+    conn.close()
+    return ret
+        
 def fetchFromUrl():
     """
     Method to fetch the CRS codes fresh from the CRS_URL specified in settings.
+    Station name and CRS are stored in all lower case for speeding up future lookups.
     """
     print "Retrieving CRS from %s" %CRS_URL
     req = urllib2.Request(CRS_URL, None, HEADERS)
@@ -59,20 +76,22 @@ def fetchFromUrl():
         sn = crs = None
         td1 = row.findNext('td')
         if td1:
-            sn = td1.a.contents
+            sn = td1.a.contents[0].lower()
             td2 = td1.findNext('td')
             if td2:
-                crs = td2.contents
+                crs = td2.contents[0].lower()
         if sn and crs:
-            c.execute('INSERT INTO crs VALUES("%s", "%s")' %(sn, crs))
+            c.execute('INSERT INTO crstab VALUES("%s", "%s")' %(sn, crs))
             cnt = cnt + 1
     conn.commit()
     c.close()
     print "Stored %d CRS codes in %s" %(cnt, CRS_SQLITE_DB)
+    conn.close()
             
 def main():
     fetchFromUrl()
-
+    print getCRS("south")
+    
 if __name__ == '__main__':
     main()
 
