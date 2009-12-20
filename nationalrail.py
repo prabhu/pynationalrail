@@ -10,6 +10,8 @@ __VERSION__ = "1.0"
 
 import sys
 import httplib, urllib
+import xml.dom.minidom
+from xml2dict import fromstring
 
 from settings import *
 from requests import *
@@ -35,15 +37,27 @@ def doSoapCall(soapAction, args):
         'Accept-Encoding' : 'gzip,deflate',
         'Content-Type' : 'application/soap+xml;charset=UTF-8;',
         'Content-Length' : len(xml),
-        'SOAPAction' : '"%s/%s"' %(ACTION_URL_PREFIX, soapAction),
+        'User-Agent' : 'National Rail Enquiries for iPhone 1.2 (iPhone; iPhone OS 3.1.2)',
+        'SOAPAction' : '"%s/%s"' %(SOAPACTION_URL_PREFIX, soapAction),
     }
     hc.request ('POST', API_URL, body=xml, headers=headers)
     resp = hc.getresponse()
     data = resp.read()
     if resp.status != 200:
         raise ValueError('Unable to receive expected data : %s, %s' % (resp.status, resp.reason))
-    return data
+    return parseXml(data, soapAction.replace("Request", "Result"))
         
+def parseXml(ixml, tagName):
+    """
+    Method to parse the given xml for the given id and return the result as object
+    minidom is used here.
+    @param xml: Xml to parse
+    @param tagName: Tag name to look for in the xml
+    """
+    doc = xml.dom.minidom.parseString(ixml)
+    response = doc.getElementsByTagName(tagName)[0].toxml()
+    return fromstring(response)
+    
 class nationalrail:
 
     # Decorators
@@ -52,18 +66,20 @@ class nationalrail:
         Decorator to check for mandatory parameters
         """
         def func(*args, **kwargs):
-            print kwargs
+            crs = kwargs.get('crs', None)
+            if not crs or len(crs) != 3:
+                print "CRS is mandatory for %s call" %api.__name__
+                sys.exit(1)
             api(*args, **kwargs)
         return func
         
     def __init__(self):
         """
-        Constructor. Initialises required values like the host, api url.
+        Constructor.
         """
         pass
         
-    #@mandatory
-    #@valid_crs
+    @mandatory
     def departures(self, numRows=5, crs="", filterCrs="", filterType="to", timeOffset=0):
         """
         Method to retrieve the departure details from a station specified by crs.
@@ -75,10 +91,11 @@ class nationalrail:
         """
         result = doSoapCall("GetDepartureBoardRequest", locals()) 
         print result
+    
             
 def main():
     rail = nationalrail()
-    rail.departures(crs="STL")
-    
+    rail.departures(crs="PAD")
+        
 if __name__ == '__main__':
     main()
