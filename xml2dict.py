@@ -10,7 +10,9 @@ def __parse_node(node):
     tmp = object_dict()
     # save attrs and text, hope there will not be a child with same name
     if node.text:
-        tmp['value'] = node.text
+        # Uncomment the below line to get value attribute for each tag
+        #tmp['value'] = node.text
+        tmp = node.text
     for (k,v) in node.attrib.items():
         tmp[k] = v
 
@@ -40,24 +42,3 @@ def fromstring(s):
     """parse a string"""
     t = ET.fromstring(s)
     return object_dict({t.tag: __parse_node(t)})
-
-
-
-if __name__ == '__main__':
-    s = """<?xml version="1.0" encoding="utf-8" ?>
-    <result>
-        <count n="1">10</count>
-        <data><id>491691</id><name>test</name></data>
-        <data><id>491692</id><name>test2</name></data>
-        <data><id>503938</id><name>hello, world</name></data>
-    </result>"""
-
-    r = fromstring(s)
-    import pprint
-    pprint.pprint(r)
-
-    print r.result.count.value
-    print r.result.count.n
-
-    for data in r.result.data:
-        print data.id, data.name 
