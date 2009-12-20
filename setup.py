@@ -6,6 +6,7 @@ setup(
     name="pynationalrail",
     version=nationalrail.__VERSION__,
     packages=find_packages(exclude=['tests']),
+    install_requires = ['BeautifulSoup>=3.1.0.1'],
     
     description="Python implementation of national rail api",
     author="Prabhu Subramanian",

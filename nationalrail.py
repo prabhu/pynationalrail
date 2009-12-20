@@ -37,7 +37,7 @@ def doSoapCall(soapAction, args):
         'Accept-Encoding' : 'gzip,deflate',
         'Content-Type' : 'application/soap+xml;charset=UTF-8;',
         'Content-Length' : len(xml),
-        'User-Agent' : 'National Rail Enquiries for iPhone 1.2 (iPhone; iPhone OS 3.1.2)',
+        'User-Agent' : 'Python National Rail - Version ' + __VERSION__,
         'SOAPAction' : '"%s/%s"' %(SOAPACTION_URL_PREFIX, soapAction),
     }
     hc.request ('POST', API_URL, body=xml, headers=headers)
