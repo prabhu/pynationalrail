@@ -14,6 +14,7 @@ from xml2dict import fromstring
 
 from settings import *
 from requests import *
+from crs import *
 
 def doSoapCall(soapAction, args):
     """
@@ -36,7 +37,7 @@ def doSoapCall(soapAction, args):
         'Accept-Encoding' : 'gzip,deflate',
         'Content-Type' : 'application/soap+xml;charset=UTF-8;',
         'Content-Length' : len(xml),
-        'User-Agent' : 'Python National Rail - Version ' + __VERSION__,
+        'User-Agent' : 'Python National Rail - How are you?',
         'SOAPAction' : '"%s/%s"' %(SOAPACTION_URL_PREFIX, soapAction),
     }
     hc.request ('POST', API_URL, body=xml, headers=headers)
@@ -86,7 +87,9 @@ class nationalrail:
         @param crs: CRS code of the station.
         @param filterCrs: CRS code of an intermediate station to filter the result.
         @param filterType: To indicate if the filterCrs is a from or to station. Default to.
-        @param timeOffset: Time offset in 
+        @param timeOffset: Time offset in mins. Max 90 I guess.
+        
+        @return JSON response.
         """
         return doSoapCall("GetDepartureBoardRequest", locals())
 
@@ -98,7 +101,9 @@ class nationalrail:
         @param crs: CRS code of the station.
         @param filterCrs: CRS code of an intermediate station to filter the result.
         @param filterType: To indicate if the filterCrs is a from or to station. Default to.
-        @param timeOffset: Time offset in 
+        @param timeOffset: Time offset in mins.
+        
+        @return JSON response.
         """
         return doSoapCall("GetArrivalBoardRequest", locals())
 
@@ -110,22 +115,35 @@ class nationalrail:
         @param crs: CRS code of the station.
         @param filterCrs: CRS code of an intermediate station to filter the result.
         @param filterType: To indicate if the filterCrs is a from or to station. Default to.
-        @param timeOffset: Time offset in 
+        @param timeOffset: Time offset in mins.
+        
+        @return JSON response.
         """
         return doSoapCall("GetArrivalDepartureBoardRequest", locals())
     
     def serviceDetails(self, serviceID):
         """
         Method to retrieve details about a particular service.
-        @param serviceID: Service ID (Identifier representing a train service) obtained from other api.        
+        @param serviceID: Service ID (Identifier representing a train service) obtained from other api.
+        
+        @return JSON response.
         """
         return doSoapCall("GetServiceDetailsRequest", locals())
-                
+    
+    def retrieveCRS(self, stationName):
+        """
+        Method to retrieve CRS for a station name.
+        @param stationName: Station Name to be used.
+        """
+        res = getCRS(stationName)
+        return [(sc.capitalize(), crs) for (sc,crs) in res]
+        
 def main():
     rail = nationalrail()
     print rail.departures(crs="PAD", filterCrs="STL")
     print rail.arrivals(crs="HAY")
     print rail.arrivalsAndDeparture(crs="PAD")
-        
+    print rail.retrieveCRS("reading")
+    
 if __name__ == '__main__':
     main()

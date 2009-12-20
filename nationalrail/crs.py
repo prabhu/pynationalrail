@@ -39,13 +39,19 @@ def recreateDB():
     c.close()
     conn.close()
 
-def getCRS(stationName):
+def getCRS(stationName, autoCreate = True):
     """
     Method to get CRS code for the give station name. This method may not
     scale nicely for a production environment. Use a proper DB instead.
     
     @param stationName: Some characters for the station name.
     """
+    # Create the SQLite DB of CRS if not found already. This can be turned off
+    # by passing autoCreate = False.
+    if not os.path.exists(CRS_SQLITE_DB) and autoCreate:
+        print "Attempting to create CRS DB for first run ..."
+        recreateDB()
+        fetchFromUrl()
     conn = sqlite3.connect(CRS_SQLITE_DB)
     c = conn.cursor()
     c.execute('SELECT * from crstab where station_name like "%%%s%%"' %stationName.lower())
