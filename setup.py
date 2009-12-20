@@ -8,7 +8,7 @@ setup(
     packages=find_packages(exclude=['tests']),
     install_requires = ['BeautifulSoup>=3.1.0.1'],
     
-    description="Python implementation of national rail api",
+    description="Python implementation of National rail api (UK)",
     author="Prabhu Subramanian",
     author_email="prabhu.subramanian@gmail.com",
     maintainer="Prabhu Subramanian",

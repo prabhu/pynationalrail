@@ -6,7 +6,6 @@ nationalrail.py
 Python implementation for National Rail api (UK).
 Author: Prabhu Subramanian
 """
-__VERSION__ = "1.0"
 
 import sys
 import httplib, urllib
