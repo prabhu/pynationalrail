@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 setup(
     name="pynationalrail",
     version=nationalrail.__VERSION__,
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(exclude=['tests', 'myrail']),
     install_requires = ['BeautifulSoup>=3.1.0.1'],
     
     description="Python implementation of National rail api (UK)",
