@@ -4,8 +4,9 @@
         <a href="#" class="button back">Search</a>
     </div>
     <ul class="metal">
+        {% if services %}
         {% for service in services %}
-        <li class="arrow"><a href="/s?id={{ service.serviceID }}&amp;crs={{ crs }}">{{ service.std }}
+        <li class="arrow"><a href="/s?id={{ service.serviceID }}&amp;crs={{ crs }}" class="flip">{{ service.std }}
         {% ifequal service.etd "Cancelled" %}
             <strong class="delayed">Cancelled</strong>
         {% endifequal %}
@@ -16,12 +17,15 @@
         {% endifnotequal %}
         <em class="below">{{ service.destination.location.locationName }}</em></a></li>
         {% endfor %}
+        {% else %}
+        <li>No trains available.</li>
+        {% endif %}
     </ul>
     <ul class="individual">
         <li><a href="#">Reload</a></li>
         <li><a href="#">Later Trains</a></li>
     </ul>
     <div class="info">
-        <p>Data as of {{ asof }}</p>
+        <p>Details as of {{ asof }}</p>
     </div>
 </div>

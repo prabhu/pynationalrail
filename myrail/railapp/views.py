@@ -10,10 +10,10 @@ def _defaults():
     """
     username = 'Guest'
     d_fromS = 'London Paddington'
-    d_toS = ''
+    d_viaS = ''
     return locals()
 
-def _redirect_home_with_error(msg):
+def _redirect_home_with_error(request, msg):
     """
     Method to redirect to home page with error
     """
@@ -53,18 +53,26 @@ def departures(request):
     if request.POST:
         p = request.POST
         fromS = p.get('fromS', None)
-        toS = p.get('toS', None)
-        if not fromS:
+        viaS = p.get('viaS', None)
+        if not fromS or fromS.strip() == "":
             error_msg = "Station name or CRS please"
-            return _redirect_home_with_error(error_msg)
-        if toS and toS.lower() == 'optional':
-            toS = None           
+            return _redirect_home_with_error(request, error_msg)
+        if viaS and viaS.lower() == 'optional':
+            viaS = None           
         crslist = _getCRS(fromS)
         if not crslist:
             error_msg = "cannot recognise station name"
-            return _redirect_home_with_error(error_msg)
-
-        filterCrslist = _getCRS(toS)
+            return _redirect_home_with_error(request, error_msg)
+        filterCrslist = _getCRS(viaS)
+        
+        # If multiple CRS are returned, then redirect to the
+        # modified search page that shows list
+        if len(crslist) > 1 or (filterCrslist and len(filterCrslist)) > 1:
+            return render_to_response('multi.html', {'crslist' : crslist,
+                                                    'filterCrslist' : filterCrslist,
+                                                    },
+                                                    context_instance=RequestContext(request))
+        
         filterCrs = ""
         sn, crs = crslist[0]
         if filterCrslist:
@@ -73,7 +81,7 @@ def departures(request):
         deps = rail.departures(crs=crs, filterCrs=filterCrs)
         services = deps.GetDepartureBoardResult.trainServices.service
         # Force a list if the result has just one service
-        if type(services) != type(list):
+        if not isinstance(services, list):
             services = [services]
         dt = deps.GetDepartureBoardResult.generatedAt.split('T')
         dtime = dt[1].split('.')[0]
