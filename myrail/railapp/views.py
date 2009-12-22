@@ -106,6 +106,7 @@ def departures(request):
         # Are there any services running?
         if deps.GetDepartureBoardResult.get('trainServices'):
             services = deps.GetDepartureBoardResult.trainServices.get('service', None)
+        platformAvailable = deps.GetDepartureBoardResult.get('platformAvailable', None)
         # Force a list if the result has just one service
         if services and not isinstance(services, list):
             services = [services]
@@ -115,7 +116,8 @@ def departures(request):
         location = deps.GetDepartureBoardResult.locationName
         response = render_to_response('dep.html', {'services' : services,
                               'location' : location,
-                              'crs' : crs, 
+                              'crs' : crs,
+                              'platformAvailable' : platformAvailable,
                               'asof' : asof},
                               context_instance=RequestContext(request))
         response.set_cookie(LAST_SEARCH_COOKIE, fromS + "|" + viaS)
