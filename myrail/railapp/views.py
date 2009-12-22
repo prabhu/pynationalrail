@@ -78,7 +78,9 @@ def departures(request):
         dt = deps.GetDepartureBoardResult.generatedAt.split('T')
         dtime = dt[1].split('.')[0]
         asof = dt[0] + " " + dtime
-    return render_to_response('dep.html', {'services' : services, 'crs' : crs, 
+    return render_to_response('dep.html', {'services' : services,
+                              'location' : deps.GetDepartureBoardResult.locationName,
+                              'crs' : crs, 
                               'asof' : asof},
                               context_instance=RequestContext(request))
 
