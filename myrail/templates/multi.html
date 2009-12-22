@@ -1,0 +1,31 @@
+{% extends "default.html" %}
+{% block errorMsg %}
+    <li class="error"><p>Refine your search</p></li>
+{% endblock %}
+{% block fromBlock %}
+    <li><label for="fromS">From</label>
+    {% if crslist %}        
+        <select id="fromS" name="fromS">
+            {% for sn, crs in crslist %}
+                <option value="{{ crs }}">{{ sn }}</option>
+            {% endfor %}
+        </select>
+    {% else %}
+        <input type="text" name="fromS" id="fromS" value="{{ d_fromS }}" placeholder="Station name or CRS" />
+    {% endif %}
+    </li>
+{% endblock %}
+
+{% block viaBlock %}
+    <li><label for="viaS">Via</label>
+    {% if filterCrslist %}
+        <select id="viaS" name="viaS">
+            {% for (sn, crs) in crslist %}
+                <option value="{{ crs }}">{{ sn }}</option>
+            {% endfor %}
+        </select>
+    {% else %}
+        <input type="text" name="viaS" id="viaS" value="{{ d_viaS }}" placeholder="Optional" />
+    {% endif %}
+    </li>
+{% endblock %}

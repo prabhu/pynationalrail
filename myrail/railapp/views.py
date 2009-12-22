@@ -1,16 +1,21 @@
 from django.http import Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
-
-from nationalrail import nationalrail as nr
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 import re
+from common.utils import create_user
+from nationalrail import nationalrail as nr
+from models import Favorite
+from common.middleware import get_current_user
+
 LAST_SEARCH_COOKIE = "lastSearch"
 
 def _defaults(request):
     """
     Method to return default values to templates.
     """
-    username = 'Guest'    
+    username = 'Guest'
     d_fromS = 'Paddington'
     d_viaS = ''
     if LAST_SEARCH_COOKIE in request.COOKIES:
@@ -18,7 +23,7 @@ def _defaults(request):
             d_fromS, d_viaS = request.COOKIES[LAST_SEARCH_COOKIE].split("|")
     return locals()
 
-def _redirect_home_with_error(request, msg):
+def _redirect_home_with_msg(request, msg):
     """
     Method to redirect to home page with error
     """
@@ -38,7 +43,7 @@ def _getCRS(station):
     rail = nr()
     # Assume CRS if the length is less than 3
     if len(station) == 3:
-        crslist = rail.retrieveCRS(crs=station)        
+        crslist = rail.retrieveCRS(crs=station)
     else:
         station = _expandCommon(station)
         crslist = rail.retrieveCRS(station_name=station)
@@ -57,8 +62,8 @@ def _expandCommon(station):
     for k,v in REP.items():
         station = re.sub('^' + k + '\s', v + ' ', station)
         station = re.sub('\s' + k + '$', ' ' + v, station)
-    return station               
-     
+    return station
+
 def app_default(request):
     """
     Method which handles the default request.
@@ -66,7 +71,7 @@ def app_default(request):
     args = _defaults(request)
     return render_to_response('default.html', args,
                               context_instance=RequestContext(request))
-    
+
 def departures(request):
     """
     Method which handles searches for departures.
@@ -77,13 +82,13 @@ def departures(request):
         viaS = p.get('viaS', None)
         if not fromS or fromS.strip() == "":
             error_msg = "Station name or CRS please"
-            return _redirect_home_with_error(request, error_msg)
+            return _redirect_home_with_msg(request, error_msg)
         if viaS and viaS.lower() == 'optional':
-            viaS = None           
+            viaS = None
         crslist = _getCRS(fromS)
         if not crslist:
             error_msg = "cannot recognise station name"
-            return _redirect_home_with_error(request, error_msg)
+            return _redirect_home_with_msg(request, error_msg)
         filterCrslist = _getCRS(viaS)
         
         # If multiple CRS are returned, then redirect to the
@@ -117,12 +122,13 @@ def departures(request):
         response = render_to_response('dep.html', {'services' : services,
                               'location' : location,
                               'crs' : crs,
+                              'filterCrs' : filterCrs,
                               'platformAvailable' : platformAvailable,
                               'asof' : asof},
                               context_instance=RequestContext(request))
         response.set_cookie(LAST_SEARCH_COOKIE, fromS + "|" + viaS)
         return response
-        
+
 def arrivals(request):
     """
     Method which handles searches for arrivals.
@@ -140,7 +146,7 @@ def service(request):
         crs = p.get('crs', None)
         if not sid:
             error_msg = "Invalid train details. Start again"
-            return _redirect_home_with_error(request, error_msg)
+            return _redirect_home_with_msg(request, error_msg)
         rail = nr()
         resp = rail.serviceDetails(sid)
         sdetails = resp.GetServiceDetailsResult
@@ -161,3 +167,77 @@ def service(request):
                               'etd' : etd,
                               },
                               context_instance=RequestContext(request))
+
+def favorites(request):
+    """
+    Method which handles favorites request
+    """
+    if request.GET:
+        g = request.GET
+        fromS = g.get('fromS', None)
+        viaS = g.get('viaS', None)
+        ftype = g.get('type', 'Departures')
+        if not fromS:
+            return _redirect_home_with_msg(request, "location missing. cannot save favorite!")
+        
+        crslist = _getCRS(fromS)
+        filterCrslist = _getCRS(viaS)
+        if not crslist:
+            return _redirect_home_with_msg(request, "Invalid station name")
+        if len(crslist) > 1 or (filterCrslist and len(filterCrslist) > 1):
+            return _redirect_home_with_msg(request, "Multiple station names retrieved.")
+        
+        fsn, crs = crslist[0]
+        vsn = filterCrs = None
+        if filterCrslist:
+            vsn, filterCrs = filterCrslist[0]
+        
+        # Construct a good favorite name
+        fname = fsn + ' ' + ftype
+        if vsn:
+            fname += ' via ' + vsn
+        user = get_current_user()
+        loggedIn = False
+        if user:
+            loggedIn = True
+        return render_to_response('fav.html', {'fname' : fname,
+                                'fromS' : fromS,
+                                'viaS' : viaS,
+                                'ftype' : ftype,
+                                'loggedIn' : loggedIn,
+                                },
+                                context_instance=RequestContext(request))
+    
+    if request.POST:
+        p = request.POST
+        fromS = p.get('fromS', None)
+        viaS = p.get('viaS', None)
+        ftype = p.get('type', 'Departures')
+        fname = p.get('fname', None)
+        if not fname or not fromS:
+            return _redirect_home_with_msg(request, "Missing values. Favorite not saved.")
+        
+        # Retrieve or create the user.
+        username = p.get('username', None)
+        password = p.get('password', None)
+        user = get_current_user()
+        if not user:
+            user = User.objects.get(username=username, password=password)
+        else:
+            username, password = user.username, user.password
+        if not username or not password or username.strip() == '' or password.strip() == '':
+            return _redirect_home_with_msg(request, "Cannot save favorite without registering.")
+
+        # Create the user and login
+        user = create_user(request, username, password)
+        user = authenticate(username=username, password=password)
+        fav = Favorite(user=user, fname=fname, 
+                       ftype=ftype, fromS=fromS, viaS=viaS)
+        fav.save()
+        return _redirect_home_with_msg(request, "Favorite saved.")
+
+def recent(request):
+    """
+    Method which handles recent search requests.
+    """
+    pass

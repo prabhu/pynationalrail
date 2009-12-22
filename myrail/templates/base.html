@@ -13,7 +13,7 @@
             var jQT = new $.jQTouch({
                 icon: 'jqtouch.png',
                 addGlossToIcon: false,
-                startupScreen: 'jqt_startup.png',
+                fullScreen: true,
                 statusBar: 'black',
             });
             
@@ -52,7 +52,6 @@
             padding-left: 25px;
         }
         ul.metal li.pstation {
-            font-size: 12px;
             font-style: normal;
             font-weight: normal;
         }
@@ -78,7 +77,6 @@
             line-height: 14px;
         }
         ul.metal li.sstation {
-            font-size: 12px;
             font-weight: normal;
             font-style: normal;            
         }
@@ -118,7 +116,7 @@
             <ul class="rounded">
                 {% block errorMsg %}
                 {% if error_msg %}
-                    <li class="error"><p>Sorry - {{ error_msg }}</p></li>
+                    <li class="error"><p>{{ error_msg }}</p></li>
                 {% endif %}
                 {% endblock %}
                 {% block fromBlock %}

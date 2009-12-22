@@ -44,6 +44,7 @@ def doSoapCall(soapAction, args):
     resp = hc.getresponse()
     data = resp.read()
     if resp.status != 200:
+        print "National rail servers having some trouble - ", resp.status, resp.reason
         raise ValueError('Unable to receive expected data : %s, %s' % (resp.status, resp.reason))
     return parseXml(data, soapAction.replace("Request", "Result"))
         

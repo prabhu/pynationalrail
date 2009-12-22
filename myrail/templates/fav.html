@@ -1,0 +1,26 @@
+<div id="fav" class="current">
+    <div class="toolbar">
+        <h1>Favorites</h1>
+        <a href="#" class="button back">Departures</a>
+    </div>
+    <form id="favAction" action="/f/" method="POST" class="form">
+        <h2>Save Favorite</h2>
+        <ul class="rounded">
+            <li><label for="fname">Name</label><input type="text" name="fname" id="fname" value="{{ fname }}" placeholder="" /></li>
+        </ul>
+        {% if not loggedIn %}
+        <ul class="rounded">
+            <h2>Register/login</h2>
+            <li><label for="username">Username</label><input type="text" name="username" id="username" value="" placeholder="" /></li>
+            <li><label for="password">Password</label><input type="password" name="password" id="password" value="" placeholder="" /></li>
+        </ul>        
+        {% endif %}
+        <input type="hidden" name="fromS" value="{{ fromS }}" />
+        <input type="hidden" name="viaS" value="{{ viaS }}" />
+        <input type="hidden" name="ftype" value="{{ ftype }}" />
+        <a style="margin:0 10px;color:rgba(0,0,0,.9)" href="#" class="submit whiteButton">Save</a>
+    </form>
+    <div class="info">
+        <p>Your <a href="mailto:prabhu.subramanian@gmail.com?subject=pynationalrail suggestion">feedback</a> will help improve this app.</p>
+    </div>    
+</div>

@@ -6,4 +6,6 @@ urlpatterns = patterns('railapp.views',
     url(r'^d/$', 'departures', name='departures'),
     url(r'^a/$', 'arrivals', name='arrivals'),
     url(r'^s/$', 'service', name='service'),
+    url(r'^f/$', 'favorites', name='favorites'),
+    url(r'^r/$', 'recent', name='recent'),
 )

@@ -1,0 +1,19 @@
+{'GetDepartureBoardResult':  {'locationName':  'London  Paddington',  'crs':
+'PAD', 'platformAvailable': 'true', 'trainServices': {'service': [{'origin':
+{'location':  {'locationName': 'London  Paddington', 'crs':  'PAD'}}, 'std':
+'23:48',  'destination':  {'location':  {'locationName':  'Reading',  'crs':
+'RDG'}},   'serviceID':   'gpd+mAPdoOshdpYuh85ueA==',  'etd':   'Cancelled',
+'operator':  'First   Great  Western',  'operatorCode':   'GW'},  {'origin':
+{'location':  {'locationName': 'London  Paddington', 'crs':  'PAD'}}, 'std':
+'00:20',  'destination':  {'location':   {'locationName':  'Oxford',  'crs':
+'OXF'}},  'serviceID':  '+wy+/CbQQT6V3F4ARjXvHQ==',  'etd':  'Starts  here',
+'operator':  'First   Great  Western',  'operatorCode':   'GW'},  {'origin':
+{'location':  {'locationName': 'London  Paddington', 'crs':  'PAD'}}, 'std':
+'00:34',  'destination':  {'location':  {'locationName':  'Reading',  'crs':
+'RDG'}},  'serviceID':  'uITccKIyS8/l0VKjQKP7Dw==',  'etd':  'Starts  here',
+'operator':  'First   Great  Western',  'operatorCode':   'GW'},  {'origin':
+{'location':  {'locationName': 'London  Paddington', 'crs':  'PAD'}}, 'std':
+'01:34',  'destination':  {'location':  {'locationName':  'Reading',  'crs':
+'RDG'}},  'serviceID':  'KLqyr5M0llXIH2b2qyri3g==',  'etd':  'Starts  here',
+'operator': 'First  Great Western', 'operatorCode':  'GW'}]}, 'generatedAt':
+'2009-12-21T23:52:13.5751807+00:00'}}

@@ -1,0 +1,49 @@
+<div id="ser" class="current">
+    <div class="toolbar">
+        <h1>{{ sdetails.std }} Train Details</h1>
+        <a href="#" class="button back">Departures</a>
+    </div>
+    <ul class="metal">
+        {% if isCancelled %}
+            <li class="creason">{{ disruptionReason }}</li>
+        {% else %}
+        {% if sdetails.previousCallingPoints %}
+        {% for pt in sdetails.previousCallingPoints.callingPointList.callingPoint %}
+            <li class="pstation">{{ pt.locationName }}<em>{{ pt.st }}</em></li>
+        {% endfor %}
+        {% endif %}
+
+        <li class="cstation">{{ sdetails.locationName }}<em class="time">{{ sdetails.std }}</em> {% if plat %}<em class="below">Platform : {{ plat }}</em>{% endif %}
+        {% if eta %}
+            {% ifnotequal eta "On time" %}
+            {% ifnotequal eta "Starts here" %}
+            {% ifnotequal eta "No report" %}
+                ({{ eta }})</li>
+            {% endifnotequal %}
+            {% endifnotequal %}
+            {% endifnotequal %}
+        {% endif %}
+        {% if etd %}
+            {% ifnotequal etd "On time" %}
+            {% ifnotequal etd "Starts here" %}
+            {% ifnotequal etd "No report" %}
+                ({{ etd }})</li>
+            {% endifnotequal %}
+            {% endifnotequal %}
+            {% endifnotequal %}
+        {% endif %}
+        {% if sdetails.subsequentCallingPoints %}
+        {% for cp in sdetails.subsequentCallingPoints.callingPointList.callingPoint %}
+            <li class="sstation">{{ cp.locationName }}<em>{{ cp.st }}</em></li>
+        {% endfor %}
+        {% endif %}
+        {% endif %}       
+    </ul>
+    <ul class="individual">
+        <li><a href="#">Reload</a></li>
+        <li><a href="#">Next Train</a></li>
+    </ul>
+    <div class="info">
+        <p>Details as of {{ asof }}</p>
+    </div>
+</div>
