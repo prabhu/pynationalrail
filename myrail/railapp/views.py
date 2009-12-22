@@ -11,7 +11,7 @@ def _defaults(request):
     Method to return default values to templates.
     """
     username = 'Guest'    
-    d_fromS = 'London Paddington'
+    d_fromS = 'Paddington'
     d_viaS = ''
     if LAST_SEARCH_COOKIE in request.COOKIES:
         if request.COOKIES[LAST_SEARCH_COOKIE]:
@@ -55,8 +55,8 @@ def _expandCommon(station):
         'w' : 'west',
     }
     for k,v in REP.items():
-        station = re.sub(k + '\s', v + ' ', station)
-        station = re.sub('\s' + k, ' ' + v, station)
+        station = re.sub('^' + k + '\s', v + ' ', station)
+        station = re.sub('\s' + k + '$', ' ' + v, station)
     return station               
      
 def app_default(request):
