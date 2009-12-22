@@ -68,20 +68,25 @@ def departures(request):
         # If multiple CRS are returned, then redirect to the
         # modified search page that shows list
         if len(crslist) > 1 or (filterCrslist and len(filterCrslist)) > 1:
-            return render_to_response('multi.html', {'crslist' : crslist,
-                                                    'filterCrslist' : filterCrslist,
-                                                    },
-                                                    context_instance=RequestContext(request))
-        
+            args = {'crslist' : crslist,
+                    'filterCrslist' : filterCrslist,
+                    }
+            args.update(_defaults())
+            return render_to_response('multi.html', args,
+                                     context_instance=RequestContext(request))
         filterCrs = ""
         sn, crs = crslist[0]
         if filterCrslist:
             sn, filterCrs = filterCrslist[0]
         rail = nr()
         deps = rail.departures(crs=crs, filterCrs=filterCrs)
-        services = deps.GetDepartureBoardResult.trainServices.service
+        
+        services = None
+        # Are there any services running?
+        if deps.GetDepartureBoardResult.get('trainServices'):
+            services = deps.GetDepartureBoardResult.trainServices.get('service', None)
         # Force a list if the result has just one service
-        if not isinstance(services, list):
+        if services and not isinstance(services, list):
             services = [services]
         dt = deps.GetDepartureBoardResult.generatedAt.split('T')
         dtime = dt[1].split('.')[0]
