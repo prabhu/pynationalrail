@@ -3,7 +3,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
 from nationalrail import nationalrail as nr
-
+import re
 LAST_SEARCH_COOKIE = "lastSearch"
 
 def _defaults(request):
@@ -40,9 +40,25 @@ def _getCRS(station):
     if len(station) == 3:
         crslist = rail.retrieveCRS(crs=station)        
     else:
+        station = _expandCommon(station)
         crslist = rail.retrieveCRS(station_name=station)
     return crslist
-    
+
+def _expandCommon(station):
+    """
+    Method to expand common acronyms like north, south
+    """
+    REP = {
+        'n' : 'north',
+        's' : 'south',
+        'e' : 'east',
+        'w' : 'west',
+    }
+    for k,v in REP.items():
+        station = re.sub(k + '\s', v + ' ', station)
+        station = re.sub('\s' + k, ' ' + v, station)
+    return station               
+     
 def app_default(request):
     """
     Method which handles the default request.
