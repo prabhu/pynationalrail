@@ -132,6 +132,26 @@ def service(request):
     """
     Method which handles service details request.
     """
-    return render_to_response('ser.html', locals(),
+    if request.GET:
+        p = request.GET
+        sid = p.get('id', None)
+        crs = p.get('crs', None)
+        if not sid:
+            error_msg = "Invalid train details. Start again"
+            return _redirect_home_with_error(request, error_msg)
+        rail = nr()
+        resp = rail.serviceDetails(sid)
+        sdetails = resp.GetServiceDetailsResult
+        dt = sdetails.generatedAt.split('T')
+        dtime = dt[1].split('.')[0]
+        asof = dt[0] + " " + dtime
+        plat = sdetails.get('platform', None)
+        isCancelled = sdetails.get('isCancelled', None)
+        disruptionReason = sdetails.get('disruptionReason', None)
+        return render_to_response('ser.html', {'sdetails' : sdetails,
+                              'asof' : asof,
+                              'plat' : plat,
+                              'isCancelled' : isCancelled,
+                              'disruptionReason' : disruptionReason,
+                              },
                               context_instance=RequestContext(request))
-

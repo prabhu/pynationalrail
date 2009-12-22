@@ -1,15 +1,12 @@
 <div id="dep" class="current">
     <div class="toolbar">
-        <h1> {{ location }} departures</h1>
+        <h1>{{ location }} departures</h1>
         <a href="#" class="button back">Search</a>
     </div>
     <ul class="metal">
         {% if services %}
         {% for service in services %}
-        <li class="arrow"><a href="/s?id={{ service.serviceID }}&amp;crs={{ crs }}" class="flip">{{ service.std }}
-        {% ifequal service.etd "Cancelled" %}
-            <strong class="delayed">Cancelled</strong>
-        {% endifequal %}
+        <li class="arrow"><a href="/s?id={{ service.serviceID }}&amp;crs={{ crs }}" class="swap">{{ service.std }}
         {% ifnotequal service.etd "On time" %}
         {% ifnotequal service.etd "Starts here" %}
         {% ifnotequal service.etd "No report" %}
