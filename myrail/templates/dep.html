@@ -10,9 +10,13 @@
         {% ifequal service.etd "Cancelled" %}
             <strong class="delayed">Cancelled</strong>
         {% endifequal %}
+        {% ifnotequal service.etd "On time" %}
         {% ifnotequal service.etd "Starts here" %}
-        {% ifnotequal service.etd service.std %}
-            <strong class="delayed">{{ service.etd }}</strong>
+        {% ifnotequal service.etd "No report" %}
+            {% ifnotequal service.etd service.std %}
+                <strong class="delayed">{{ service.etd }}</strong>
+            {% endifnotequal %}
+        {% endifnotequal %}
         {% endifnotequal %}
         {% endifnotequal %}
         <em class="below">{{ service.destination.location.locationName }}</em></a></li>
