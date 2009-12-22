@@ -72,7 +72,9 @@ def departures(request):
         rail = nr()
         deps = rail.departures(crs=crs, filterCrs=filterCrs)
         services = deps.GetDepartureBoardResult.trainServices.service
-        
+        # Force a list if the result has just one service
+        if type(services) != type(list):
+            services = [services]
         dt = deps.GetDepartureBoardResult.generatedAt.split('T')
         dtime = dt[1].split('.')[0]
         asof = dt[0] + " " + dtime
