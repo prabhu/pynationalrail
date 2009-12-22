@@ -4,13 +4,18 @@ from django.template import RequestContext
 
 from nationalrail import nationalrail as nr
 
-def _defaults():
+LAST_SEARCH_COOKIE = "lastSearch"
+
+def _defaults(request):
     """
     Method to return default values to templates.
     """
-    username = 'Guest'
+    username = 'Guest'    
     d_fromS = 'London Paddington'
     d_viaS = ''
+    if LAST_SEARCH_COOKIE in request.COOKIES:
+        if request.COOKIES[LAST_SEARCH_COOKIE]:
+            d_fromS, d_viaS = request.COOKIES[LAST_SEARCH_COOKIE].split("|")
     return locals()
 
 def _redirect_home_with_error(request, msg):
@@ -19,7 +24,7 @@ def _redirect_home_with_error(request, msg):
     """
     error_msg = msg
     args = locals()
-    args.update(_defaults())
+    args.update(_defaults(request))
     return render_to_response('default.html', args,
                       context_instance=RequestContext(request))
 
@@ -42,7 +47,7 @@ def app_default(request):
     """
     Method which handles the default request.
     """
-    args = _defaults()
+    args = _defaults(request)
     return render_to_response('default.html', args,
                               context_instance=RequestContext(request))
     
@@ -71,7 +76,7 @@ def departures(request):
             args = {'crslist' : crslist,
                     'filterCrslist' : filterCrslist,
                     }
-            args.update(_defaults())
+            args.update(_defaults(request))
             return render_to_response('multi.html', args,
                                      context_instance=RequestContext(request))
         filterCrs = ""
@@ -91,12 +96,15 @@ def departures(request):
         dt = deps.GetDepartureBoardResult.generatedAt.split('T')
         dtime = dt[1].split('.')[0]
         asof = dt[0] + " " + dtime
-    return render_to_response('dep.html', {'services' : services,
-                              'location' : deps.GetDepartureBoardResult.locationName,
+        location = deps.GetDepartureBoardResult.locationName
+        response = render_to_response('dep.html', {'services' : services,
+                              'location' : location,
                               'crs' : crs, 
                               'asof' : asof},
                               context_instance=RequestContext(request))
-
+        response.set_cookie(LAST_SEARCH_COOKIE, fromS + "|" + viaS)
+        return response
+        
 def arrivals(request):
     """
     Method which handles searches for arrivals.
