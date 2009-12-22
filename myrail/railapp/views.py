@@ -148,10 +148,14 @@ def service(request):
         plat = sdetails.get('platform', None)
         isCancelled = sdetails.get('isCancelled', None)
         disruptionReason = sdetails.get('disruptionReason', None)
+        eta = sdetails.get('eta', None)
+        etd = sdetails.get('etd', None)
         return render_to_response('ser.html', {'sdetails' : sdetails,
                               'asof' : asof,
                               'plat' : plat,
                               'isCancelled' : isCancelled,
                               'disruptionReason' : disruptionReason,
+                              'eta' : eta,
+                              'etd' : etd,
                               },
                               context_instance=RequestContext(request))
