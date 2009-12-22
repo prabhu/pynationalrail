@@ -2,10 +2,11 @@
     <div class="toolbar">
         <a href="#" class="button back">Back</a>
     </div>
-    <ul class="edgetoedge">
-        <li>10:23 - in 2 mins</li>
-        <li>10:28 - in 7 mins</li>
-        <li>11:24</li>
+    <ul class="metal">
+        {% for service in services %}
+        <li class="arrow"><a href="/s?id={{ service.serviceID }}&crs={{ crs }}">{{ service.std }}
+            <em>{{ service.destination.location.locationName }}</em></a></li>
+        {% endfor %}
     </ul>
     <ul class="individual">
         <li><a href="#">Reload</a></li>

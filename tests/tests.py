@@ -27,7 +27,7 @@ class tests(unittest.TestCase):
         
     def testRetrieveCRS(self):
         """ Test if we are able to retrieve CRS """
-        self.assert_(self.rail.retrieveCRS("paddington"))
+        self.assert_(self.rail.retrieveCRS(station_name="paddington"))
     
     def testDeparture(self):
         """ Test if we are able to retrieve live departures """

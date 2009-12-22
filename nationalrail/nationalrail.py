@@ -70,6 +70,9 @@ class nationalrail:
             if not crs or len(crs) != 3:
                 print "CRS is mandatory for %s call" %api.__name__
                 sys.exit(1)
+            # Capitalise CRS.
+            kwargs['crs'] = crs.upper()
+            kwargs['filterCrs'] = kwargs['filterCrs'].upper() 
             return api(*args, **kwargs)
         return func
         
@@ -130,12 +133,12 @@ class nationalrail:
         """
         return doSoapCall("GetServiceDetailsRequest", locals())
     
-    def retrieveCRS(self, stationName):
+    def retrieveCRS(self, station_name=None, crs=None):
         """
         Method to retrieve CRS for a station name.
-        @param stationName: Station Name to be used.
+        @param station_name: Station Name to be used.
         """
-        res = getCRS(stationName)
+        res = getCRS(station_name=station_name, crs=crs)
         return [(sc.capitalize(), crs) for (sc,crs) in res]
         
 def main():
@@ -143,7 +146,7 @@ def main():
     print rail.departures(crs="PAD", filterCrs="STL")
     print rail.arrivals(crs="HAY")
     print rail.arrivalsAndDeparture(crs="PAD")
-    print rail.retrieveCRS("reading")
+    print rail.retrieveCRS(station_name="reading")
     
 if __name__ == '__main__':
     main()
