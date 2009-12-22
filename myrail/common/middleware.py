@@ -20,4 +20,3 @@ class ThreadLocalsMiddleware(object):
     """
     def process_request(self, request):
         _thread_locals.user = getattr(request, 'user', None)
-        

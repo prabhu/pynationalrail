@@ -2,7 +2,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import login, authenticate
 import re
 from common.utils import create_user
 from nationalrail import nationalrail as nr
@@ -15,7 +15,10 @@ def _defaults(request):
     """
     Method to return default values to templates.
     """
-    username = 'Guest'
+    if getattr(request, 'user'):
+        username = request.user.username
+    else:
+        username = 'Guest'
     d_fromS = 'Paddington'
     d_viaS = ''
     if LAST_SEARCH_COOKIE in request.COOKIES:
@@ -196,7 +199,11 @@ def favorites(request):
         fname = fsn + ' ' + ftype
         if vsn:
             fname += ' via ' + vsn
-        user = get_current_user()
+        user = None
+        
+        # See if the user is logged in.
+        if getattr(request, 'user'):
+            user = request.user
         loggedIn = False
         if user:
             loggedIn = True
@@ -220,18 +227,22 @@ def favorites(request):
         # Retrieve or create the user.
         username = p.get('username', None)
         password = p.get('password', None)
-        user = get_current_user()
-        if not user:
-            user = User.objects.get(username=username, password=password)
-        else:
-            username, password = user.username, user.password
-        if not username or not password or username.strip() == '' or password.strip() == '':
-            return _redirect_home_with_msg(request, "Cannot save favorite without registering.")
-
-        # Create the user and login
-        user = create_user(request, username, password)
-        user = authenticate(username=username, password=password)
-        fav = Favorite(user=user, fname=fname, 
+        user = None
+        try:
+            if getattr(request, 'user'):
+                user = request.user
+            if not user:
+                user = User.objects.get(username=username, password=password)
+            else:
+                username, password = user.username, user.password
+            if not username or not password or username.strip() == '' or password.strip() == '':
+                return _redirect_home_with_msg(request, "Cannot save favorite without registering.")
+        except User.DoesNotExist:
+            # Create the user and login
+            user = create_user(request, username, password)
+            user = authenticate(username=username, password=password)
+            login(request, user)
+        fav = Favorite(user=user, fname=fname,
                        ftype=ftype, fromS=fromS, viaS=viaS)
         fav.save()
         return _redirect_home_with_msg(request, "Favorite saved.")
