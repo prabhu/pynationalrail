@@ -208,6 +208,9 @@ def _parseJPData(response):
     ret_options = []
     soup = soup.find('tr', {"class" : "first"}).parent
     for row in soup.findAll('tr', recursive=False):
+        # Skip changes section since it gets handled below.
+        if row['class'] == 'changes':
+            continue
         service = {}
         row = row.findNext('td', {'class' : 'leaving'})
         service['leaving'] = row.contents[0].strip()
