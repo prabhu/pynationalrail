@@ -5,36 +5,38 @@
     </div>
     <ul class="metal">
         {% if isCancelled %}
-            <li class="creason">{{ disruptionReason }}</li>
+            <li class="creason">{{ disruptionReason|safe }}</li>
         {% else %}
         {% if sdetails.previousCallingPoints %}
         {% for pt in sdetails.previousCallingPoints.callingPointList.callingPoint %}
-            <li class="pstation">{{ pt.locationName }}<em>{{ pt.st }}</em></li>
+            <li class="pstation">{{ pt.locationName|safe }}<em>{{ pt.st }}</em></li>
         {% endfor %}
         {% endif %}
 
-        <li class="cstation">{{ sdetails.locationName }}<em class="time">{{ sdetails.std }}</em> {% if plat %}<em class="below">Platform : {{ plat }}</em>{% endif %}
+        <li class="cstation">{{ sdetails.locationName|safe }}<em class="time">{{ sdetails.std }}</em> {% if plat %}<em class="below">Platform : {{ plat }}</em>{% endif %}
         {% if eta %}
             {% ifnotequal eta "On time" %}
             {% ifnotequal eta "Starts here" %}
             {% ifnotequal eta "No report" %}
-                ({{ eta }})</li>
+                ({{ eta }})
             {% endifnotequal %}
             {% endifnotequal %}
             {% endifnotequal %}
+        {% else %}
+            {% if etd %}
+                {% ifnotequal etd "On time" %}
+                {% ifnotequal etd "Starts here" %}
+                {% ifnotequal etd "No report" %}
+                    ({{ etd }})
+                {% endifnotequal %}
+                {% endifnotequal %}
+                {% endifnotequal %}
+            {% endif %}
         {% endif %}
-        {% if etd %}
-            {% ifnotequal etd "On time" %}
-            {% ifnotequal etd "Starts here" %}
-            {% ifnotequal etd "No report" %}
-                ({{ etd }})</li>
-            {% endifnotequal %}
-            {% endifnotequal %}
-            {% endifnotequal %}
-        {% endif %}
+    </li>
         {% if sdetails.subsequentCallingPoints %}
         {% for cp in sdetails.subsequentCallingPoints.callingPointList.callingPoint %}
-            <li class="sstation">{{ cp.locationName }}<em>{{ cp.st }}</em></li>
+            <li class="sstation">{{ cp.locationName|safe }}<em>{{ cp.st }}</em></li>
         {% endfor %}
         {% endif %}
         {% endif %}       

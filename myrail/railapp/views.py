@@ -15,8 +15,10 @@ def _defaults(request):
     """
     Method to return default values to templates.
     """
+    loggedIn = False
     if getattr(request, 'user'):
         username = request.user.username
+        loggedIn = True
     else:
         username = 'Guest'
     d_fromS = 'Paddington'
@@ -72,6 +74,8 @@ def app_default(request):
     Method which handles the default request.
     """
     args = _defaults(request)
+    favs = Favorite.objects.all()[:5]
+    args.update(favs=favs)
     return render_to_response('default.html', args,
                               context_instance=RequestContext(request))
 
@@ -104,9 +108,10 @@ def departures(request):
             return render_to_response('multi.html', args,
                                      context_instance=RequestContext(request))
         filterCrs = ""
-        sn, crs = crslist[0]
+        fsn, crs = crslist[0]
+        vsn = ''
         if filterCrslist:
-            sn, filterCrs = filterCrslist[0]
+            vsn, filterCrs = filterCrslist[0]
         rail = nr()
         deps = rail.departures(crs=crs, filterCrs=filterCrs)
         
@@ -129,7 +134,7 @@ def departures(request):
                               'platformAvailable' : platformAvailable,
                               'asof' : asof},
                               context_instance=RequestContext(request))
-        response.set_cookie(LAST_SEARCH_COOKIE, fromS + "|" + viaS)
+        response.set_cookie(LAST_SEARCH_COOKIE, fsn + "|" + vsn)
         return response
 
 def arrivals(request):
@@ -199,13 +204,10 @@ def favorites(request):
         fname = fsn + ' ' + ftype
         if vsn:
             fname += ' via ' + vsn
-        user = None
         
         # See if the user is logged in.
-        if getattr(request, 'user'):
-            user = request.user
         loggedIn = False
-        if user:
+        if getattr(request, 'user'):
             loggedIn = True
         return render_to_response('fav.html', {'fname' : fname,
                                 'fromS' : fromS,
@@ -250,5 +252,11 @@ def favorites(request):
 def recent(request):
     """
     Method which handles recent search requests.
+    """
+    pass
+
+def favorites_search(request):
+    """
+    Method which handles favorite search.
     """
     pass

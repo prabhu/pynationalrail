@@ -7,11 +7,11 @@
     {% if crslist %}        
         <select id="fromS" name="fromS">
             {% for sn, crs in crslist %}
-                <option value="{{ crs }}">{{ sn }}</option>
+                <option value="{{ crs }}">{{ sn|safe }}</option>
             {% endfor %}
         </select>
     {% else %}
-        <input type="text" name="fromS" id="fromS" value="{{ d_fromS }}" placeholder="Station name or CRS" />
+        <input type="text" name="fromS" id="fromS" value="{{ d_fromS|safe }}" placeholder="Station name or CRS" />
     {% endif %}
     </li>
 {% endblock %}
@@ -21,11 +21,11 @@
     {% if filterCrslist %}
         <select id="viaS" name="viaS">
             {% for (sn, crs) in crslist %}
-                <option value="{{ crs }}">{{ sn }}</option>
+                <option value="{{ crs }}">{{ sn|safe }}</option>
             {% endfor %}
         </select>
     {% else %}
-        <input type="text" name="viaS" id="viaS" value="{{ d_viaS }}" placeholder="Optional" />
+        <input type="text" name="viaS" id="viaS" value="{{ d_viaS|safe }}" placeholder="Optional" />
     {% endif %}
     </li>
 {% endblock %}

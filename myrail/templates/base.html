@@ -116,20 +116,36 @@
             <ul class="rounded">
                 {% block errorMsg %}
                 {% if error_msg %}
-                    <li class="error"><p>{{ error_msg }}</p></li>
+                    <li class="error"><p>{{ error_msg|safe }}</p></li>
                 {% endif %}
                 {% endblock %}
                 {% block fromBlock %}
-                <li><label for="fromS">From</label><input type="text" name="fromS" id="fromS" value="{{ d_fromS }}" placeholder="Station name or CRS" /></li>
+                <li><label for="fromS">From</label><input type="text" name="fromS" id="fromS" value="{{ d_fromS|safe }}" placeholder="Station name or CRS" /></li>
                 {% endblock %}
                 {% block viaBlock %}
-                <li><label for="viaS">Via</label><input type="text" name="viaS" id="viaS" value="{{ d_viaS }}" placeholder="Optional" /></li>
+                <li><label for="viaS">Via</label><input type="text" name="viaS" id="viaS" value="{{ d_viaS|safe }}" placeholder="Optional" /></li>
                 {% endblock %}
             </ul>
             <a style="margin:0 10px;color:rgba(0,0,0,.9)" href="#" class="submit whiteButton">Departures</a>
         </form>
+        {% block favBlock %}
+        {% if favs %}
+        <h2>Favorite Searches</h2>
+        <ul class="metal">
+        {% for fav in favs %}
+        <li class="arrow"><a href="/fs/?id={{ fav.id }}">{{ fav.fname|safe }}</a></li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+        {% endblock %}
         <ul class="individual">
-            <li><a href="#">Recent</a></li>
+            <li>
+            {% if not loggedIn %}
+                <a href="#">Login</a>
+            {% else %}
+                <a href="#">Login</a>
+            {% endif %}
+            </li>
             <li><a href="#">Advanced</a></li>
         </ul>
         <div class="info">
