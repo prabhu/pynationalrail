@@ -320,3 +320,10 @@ def loginAction(request):
         user = authenticate(username=username, password=password)
         login(request, user)
         return _redirect_home_with_msg(request, "Welcome back!")
+
+def journeyPlanner(request):
+    """
+    Method to handle journey planner requests. Advanced button in home page.
+    """
+    pass
+    

@@ -10,4 +10,5 @@ urlpatterns = patterns('railapp.views',
     url(r'^fs/$', 'favorites_search', name='favorites-search'),
     url(r'^r/$', 'recent', name='recent'),
     url(r'^login/$', 'loginAction', name='login'),
+    url(r'^j/$', 'journeyPlanner', name='journeyPlanner'),
 )
