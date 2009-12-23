@@ -92,18 +92,33 @@
     </style>
 </head>
 <body>
+    <div id="login" class="selectable">
+        <div class="toolbar">
+            <h1>Register/Login</h1>
+            <a href="#" class="button back">Home</a>        
+        </div>
+        <form id="loginAction" action="/login/" method="POST" class="form">
+            <ul class="rounded">
+                <li><label for="username">Username</label><input type="text" name="username" id="username" value="" placeholder="" /></li>
+                <li><label for="password">Password</label><input type="password" name="password" id="password" value="" placeholder="" /></li>
+            </ul>
+            <a style="margin:0 10px;color:rgba(0,0,0,.9)" href="#" class="submit whiteButton">Login</a>
+        </form>
+    </div>
     <div id="about" class="selectable">
         <div class="about">
             <h1>About My Rail</h1>
-            <p>
-                This is an attempt to provide a Slick mobile interface for National Rail that doesn't suck and serves you quick.</p>
-            <p>
-                Done purely as a hobby project and is not affiliated to National Rail.</p>
-            <p>&nbsp;</p>
-            <p>Code is entirely open source too. Check it <a href="http://github.com/prabhu/pynationalrail">out</a></p>
-            <p>&nbsp;</p>
-            <p><em>Suggestions?</em> Email <a href="mailto:prabhu.subramanian@gmail.com?subject=pynationalrail suggestion">me</a></p>
-            <p><br /><br /><a href="#" class="whiteButton goback">Close</a></p>
+            <div style="margin: 40px 40px 0 40px;">
+                <p>
+                    This is an attempt to provide a Slick mobile interface for National Rail that doesn't suck and serves you quick.</p>
+                <p>
+                    Done purely as a hobby project and is not affiliated to National Rail.</p>
+                <p>&nbsp;</p>
+                <p>Code is entirely open source too. Check it <a href="http://github.com/prabhu/pynationalrail">out</a></p>
+                <p>&nbsp;</p>
+                <p><em>Suggestions?</em> Email <a href="mailto:prabhu.subramanian@gmail.com?subject=pynationalrail suggestion">me</a></p>
+                <p><br /><br /><a href="#" class="whiteButton goback">Close</a></p>
+            </div>
         </div>
     </div>
     <div id="home" class="current">
@@ -120,7 +135,7 @@
                 {% endif %}
                 {% endblock %}
                 {% block fromBlock %}
-                <li><label for="fromS">From</label><input type="text" name="fromS" id="fromS" value="{{ d_fromS|safe }}" placeholder="Station name or CRS" /></li>
+                <li><label for="fromS">From</label><input type="text" name="fromS" id="fromS" value="{{ d_fromS|safe }}" placeholder="Part of station name or short code" /></li>
                 {% endblock %}
                 {% block viaBlock %}
                 <li><label for="viaS">Via</label><input type="text" name="viaS" id="viaS" value="{{ d_viaS|safe }}" placeholder="Optional" /></li>
@@ -141,9 +156,9 @@
         <ul class="individual">
             <li>
             {% if not loggedIn %}
-                <a href="#">Login</a>
+                <a href="#login" class="slideup">Register/Login</a>
             {% else %}
-                <a href="#">Login</a>
+                <a href="http://www.nationalrail.co.uk" target="_blank">National Rail Website</a>
             {% endif %}
             </li>
             <li><a href="#">Advanced</a></li>

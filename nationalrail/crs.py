@@ -50,7 +50,6 @@ def getCRS(station_name=None, crs=None, autoCreate=True):
     """
     # Create the SQLite DB of CRS if not found already. This can be turned off
     # by passing autoCreate = False.
-    print station_name
     if not os.path.exists(CRS_SQLITE_DB) and autoCreate:
         print "Attempting to create CRS DB for first run ..."
         recreateDB()
@@ -59,7 +58,6 @@ def getCRS(station_name=None, crs=None, autoCreate=True):
     c = conn.cursor()
     
     if station_name:
-        print 'SELECT * from crstab where station_name like "%%%s%%"' %station_name.lower()
         c.execute('SELECT * from crstab where station_name like "%%%s%%"' %station_name.lower())
     elif crs:
         c.execute('SELECT * from crstab where crs like "%%%s%%"' %crs.lower())

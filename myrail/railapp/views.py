@@ -16,11 +16,12 @@ def _defaults(request):
     Method to return default values to templates.
     """
     loggedIn = False
+    username = 'Guest'
     if getattr(request, 'user'):
-        username = request.user.username
-        loggedIn = True
-    else:
-        username = 'Guest'
+        user = request.user
+        if not user.is_anonymous():
+            username = request.user.username
+            loggedIn = True
     d_fromS = 'Paddington'
     d_viaS = ''
     if LAST_SEARCH_COOKIE in request.COOKIES:
@@ -35,6 +36,11 @@ def _redirect_home_with_msg(request, msg):
     error_msg = msg
     args = locals()
     args.update(_defaults(request))
+    favs = None
+    user = request.user
+    if not user.is_anonymous():
+        favs = Favorite.objects.filter(user=user)[:6]
+    args.update(favs=favs)
     return render_to_response('default.html', args,
                       context_instance=RequestContext(request))
 
@@ -74,8 +80,6 @@ def app_default(request):
     Method which handles the default request.
     """
     args = _defaults(request)
-    favs = Favorite.objects.all()[:5]
-    args.update(favs=favs)
     return render_to_response('default.html', args,
                               context_instance=RequestContext(request))
 
@@ -260,3 +264,23 @@ def favorites_search(request):
     Method which handles favorite search.
     """
     pass
+
+def loginAction(request):
+    """
+    Method to handle login/register request.
+    """
+    if request.POST:
+        p = request.POST
+        # Retrieve or create the user.
+        username = p.get('username', None)
+        password = p.get('password', None)
+        if not username or not password:
+            return _redirect_home_with_msg(request, "Need username and password.")
+        try:
+            user = User.objects.get(username=username, password=password)
+        except User.DoesNotExist:
+            # Create the user and login
+            user = create_user(request, username, password)
+        user = authenticate(username=username, password=password)
+        login(request, user)
+        return _redirect_home_with_msg(request, "Welcome back!")
