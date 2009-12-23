@@ -23,7 +23,13 @@
         {% endif %}
     </ul>
     <ul class="individual">
-        <li><a href="/f/?fromS={{ crs }}&viaS={{ filterCrs }}">Add to Favorites</a></li>
+        <li>
+            {% if not favId %}
+            <a href="/f/?a=c&fromS={{ crs }}&viaS={{ filterCrs }}">Add to Favorites</a>
+            {% else %}
+            <a href="/f/?a=d&id={{ favId }}">Remove Favorite</a>
+            {% endif %}
+            </li>
         <li><a href="#">Later Trains</a></li>
     </ul>
     <div class="info">

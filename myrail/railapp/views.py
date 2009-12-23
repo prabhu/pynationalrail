@@ -10,6 +10,7 @@ from models import Favorite
 from common.middleware import get_current_user
 
 LAST_SEARCH_COOKIE = "lastSearch"
+DEPARTURES = 'Departures'
 
 def _defaults(request):
     """
@@ -17,11 +18,13 @@ def _defaults(request):
     """
     loggedIn = False
     username = 'Guest'
+    favs = None
     if getattr(request, 'user'):
         user = request.user
         if not user.is_anonymous():
             username = request.user.username
             loggedIn = True
+            favs = Favorite.objects.filter(user=user)[:6]
     d_fromS = 'Paddington'
     d_viaS = ''
     if LAST_SEARCH_COOKIE in request.COOKIES:
@@ -36,11 +39,6 @@ def _redirect_home_with_msg(request, msg):
     error_msg = msg
     args = locals()
     args.update(_defaults(request))
-    favs = None
-    user = request.user
-    if not user.is_anonymous():
-        favs = Favorite.objects.filter(user=user)[:6]
-    args.update(favs=favs)
     return render_to_response('default.html', args,
                       context_instance=RequestContext(request))
 
@@ -91,55 +89,63 @@ def departures(request):
         p = request.POST
         fromS = p.get('fromS', None)
         viaS = p.get('viaS', None)
-        if not fromS or fromS.strip() == "":
-            error_msg = "Station name or CRS please"
-            return _redirect_home_with_msg(request, error_msg)
-        if viaS and viaS.lower() == 'optional':
-            viaS = None
-        crslist = _getCRS(fromS)
-        if not crslist:
-            error_msg = "cannot recognise station name"
-            return _redirect_home_with_msg(request, error_msg)
-        filterCrslist = _getCRS(viaS)
-        
-        # If multiple CRS are returned, then redirect to the
-        # modified search page that shows list
-        if len(crslist) > 1 or (filterCrslist and len(filterCrslist)) > 1:
-            args = {'crslist' : crslist,
-                    'filterCrslist' : filterCrslist,
-                    }
-            args.update(_defaults(request))
-            return render_to_response('multi.html', args,
-                                     context_instance=RequestContext(request))
-        filterCrs = ""
-        fsn, crs = crslist[0]
-        vsn = ''
-        if filterCrslist:
-            vsn, filterCrs = filterCrslist[0]
-        rail = nr()
-        deps = rail.departures(crs=crs, filterCrs=filterCrs)
-        
-        services = None
-        # Are there any services running?
-        if deps.GetDepartureBoardResult.get('trainServices'):
-            services = deps.GetDepartureBoardResult.trainServices.get('service', None)
-        platformAvailable = deps.GetDepartureBoardResult.get('platformAvailable', None)
-        # Force a list if the result has just one service
-        if services and not isinstance(services, list):
-            services = [services]
-        dt = deps.GetDepartureBoardResult.generatedAt.split('T')
-        dtime = dt[1].split('.')[0]
-        asof = dt[0] + " " + dtime
-        location = deps.GetDepartureBoardResult.locationName
-        response = render_to_response('dep.html', {'services' : services,
-                              'location' : location,
-                              'crs' : crs,
-                              'filterCrs' : filterCrs,
-                              'platformAvailable' : platformAvailable,
-                              'asof' : asof},
-                              context_instance=RequestContext(request))
-        response.set_cookie(LAST_SEARCH_COOKIE, fsn + "|" + vsn)
-        return response
+        return _handleDepartures(request, fromS=fromS, viaS=viaS)
+
+def _handleDepartures(request, fromS=None, viaS=None, favId=None):
+    """
+    Re-usable method which handles departure requests.
+    This can be invoked from other places like favorites.
+    """
+    if not fromS or fromS.strip() == "":
+        error_msg = "Station name or CRS please"
+        return _redirect_home_with_msg(request, error_msg)
+    if viaS and viaS.lower() == 'optional':
+        viaS = None
+    crslist = _getCRS(fromS)
+    if not crslist:
+        error_msg = "cannot recognise station name"
+        return _redirect_home_with_msg(request, error_msg)
+    filterCrslist = _getCRS(viaS)
+    
+    # If multiple CRS are returned, then redirect to the
+    # modified search page that shows list
+    if len(crslist) > 1 or (filterCrslist and len(filterCrslist)) > 1:
+        args = {'crslist' : crslist,
+                'filterCrslist' : filterCrslist,
+                }
+        args.update(_defaults(request))
+        return render_to_response('multi.html', args,
+                                 context_instance=RequestContext(request))
+    filterCrs = ""
+    fsn, crs = crslist[0]
+    vsn = ''
+    if filterCrslist:
+        vsn, filterCrs = filterCrslist[0]
+    rail = nr()
+    deps = rail.departures(crs=crs, filterCrs=filterCrs)
+    
+    services = None
+    # Are there any services running?
+    if deps.GetDepartureBoardResult.get('trainServices'):
+        services = deps.GetDepartureBoardResult.trainServices.get('service', None)
+    platformAvailable = deps.GetDepartureBoardResult.get('platformAvailable', None)
+    # Force a list if the result has just one service
+    if services and not isinstance(services, list):
+        services = [services]
+    dt = deps.GetDepartureBoardResult.generatedAt.split('T')
+    dtime = dt[1].split('.')[0]
+    asof = dt[0] + " " + dtime
+    location = deps.GetDepartureBoardResult.locationName
+    response = render_to_response('dep.html', {'services' : services,
+                          'location' : location,
+                          'crs' : crs,
+                          'filterCrs' : filterCrs,
+                          'platformAvailable' : platformAvailable,
+                          'favId' : favId,
+                          'asof' : asof},
+                          context_instance=RequestContext(request))
+    response.set_cookie(LAST_SEARCH_COOKIE, fsn + "|" + vsn)
+    return response
 
 def arrivals(request):
     """
@@ -186,9 +192,23 @@ def favorites(request):
     """
     if request.GET:
         g = request.GET
+        action = g.get('a', None)
         fromS = g.get('fromS', None)
         viaS = g.get('viaS', None)
-        ftype = g.get('type', 'Departures')
+        ftype = g.get('type', DEPARTURES)
+        
+        # Check if we are trying to delete an existing favorite
+        if action == 'd':
+            id = g.get('id', None)
+            if not id:
+                return _redirect_home_with_msg(request, "ID missing. Cannot delete favorite.")
+            try:
+                fav = Favorite.objects.get(id=id, user=request.user)
+                fav.delete()
+                return _redirect_home_with_msg(request, "Favorite removed successfully.")
+            except Favorite.DoesNotExist:
+                return _redirect_home_with_msg(request, "Invalid favorite id.")
+                
         if not fromS:
             return _redirect_home_with_msg(request, "location missing. cannot save favorite!")
         
@@ -263,8 +283,26 @@ def favorites_search(request):
     """
     Method which handles favorite search.
     """
-    pass
-
+    if request.GET:
+        try:
+            g = request.GET
+            id = g.get('id', None)
+            user = request.user
+            if not id:
+                return _redirect_home_with_msg(request, "Invalid favorite chosen")
+            if not user or user.is_anonymous():
+                return _redirect_home_with_msg(request, "You need to login first!")
+            try:
+                fav = Favorite.objects.get(user=user, id=id)
+            except Favorite.DoesNotExist:
+                return _redirect_home_with_msg(request, "Invalid favorite chosen")
+            ftype, fromS, viaS = fav.ftype, fav.fromS, fav.viaS
+            if ftype == DEPARTURES:
+                return _handleDepartures(request, fromS=fromS, viaS=viaS, favId=id)
+        except:
+            import traceback
+            traceback.print_exc()
+            
 def loginAction(request):
     """
     Method to handle login/register request.
