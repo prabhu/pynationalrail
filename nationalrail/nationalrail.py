@@ -16,6 +16,8 @@ from settings import *
 from requests import *
 from crs import *
 
+__VERSION__ = "1.0"
+
 def doSoapCall(soapAction, args):
     """
     Method to make soap call given the url and proper xml.

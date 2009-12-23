@@ -4,7 +4,7 @@ from django.template import RequestContext
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 import re
-from common.utils import create_user
+from common.utils import create_user, debugger
 from nationalrail import nationalrail as nr
 from models import Favorite
 from common.middleware import get_current_user
@@ -73,6 +73,7 @@ def _expandCommon(station):
         station = re.sub('\s' + k + '$', ' ' + v, station)
     return station
 
+@debugger
 def app_default(request):
     """
     Method which handles the default request.
@@ -81,6 +82,7 @@ def app_default(request):
     return render_to_response('default.html', args,
                               context_instance=RequestContext(request))
 
+@debugger
 def departures(request):
     """
     Method which handles searches for departures.
