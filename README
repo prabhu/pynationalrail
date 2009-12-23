@@ -1,12 +1,21 @@
 pynationalrail
 ---------------
 
-pynationalrail is a python implementation of the national rail api.
+pynationalrail is a python implementation of the national rail api. 
+
+Plus it also includes a django based webapp (myrail) to showcase the power of the api. The app uses jqtouch and hence is optimised for modern smartphones.
 
 Dependencies
 -------------
+For core api
+------------
 python 2.6.x
 Beautiful Soup
+
+For Webapp
+----------
+Django 1.1.1
+jqTouch - Bundled with the app
 
 Installation
 -------------
@@ -24,7 +33,16 @@ rail = nationalrail()
 print rail.departures(crs="PAD", filterCrs="STL")
 print rail.arrivals(crs="HAY")
 print rail.arrivalsAndDeparture(crs="PAD")
+
+Django app
+----------
+
+myrail app can be run just like any other django apps.
     
 TODO
 ----
-- Smart station name recognition.
+- Webapp requires a number of features.
+
+Contact
+-------
+Feedbacks to prabhu dot subramanian at gmail.com
