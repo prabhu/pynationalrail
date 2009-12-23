@@ -208,7 +208,7 @@ def favorites(request):
                 return _redirect_home_with_msg(request, "Favorite removed successfully.")
             except Favorite.DoesNotExist:
                 return _redirect_home_with_msg(request, "Invalid favorite id.")
-                
+        
         if not fromS:
             return _redirect_home_with_msg(request, "location missing. cannot save favorite!")
         
@@ -284,25 +284,21 @@ def favorites_search(request):
     Method which handles favorite search.
     """
     if request.GET:
+        g = request.GET
+        id = g.get('id', None)
+        user = request.user
+        if not id:
+            return _redirect_home_with_msg(request, "Invalid favorite chosen")
+        if not user or user.is_anonymous():
+            return _redirect_home_with_msg(request, "You need to login first!")
         try:
-            g = request.GET
-            id = g.get('id', None)
-            user = request.user
-            if not id:
-                return _redirect_home_with_msg(request, "Invalid favorite chosen")
-            if not user or user.is_anonymous():
-                return _redirect_home_with_msg(request, "You need to login first!")
-            try:
-                fav = Favorite.objects.get(user=user, id=id)
-            except Favorite.DoesNotExist:
-                return _redirect_home_with_msg(request, "Invalid favorite chosen")
-            ftype, fromS, viaS = fav.ftype, fav.fromS, fav.viaS
-            if ftype == DEPARTURES:
-                return _handleDepartures(request, fromS=fromS, viaS=viaS, favId=id)
-        except:
-            import traceback
-            traceback.print_exc()
-            
+            fav = Favorite.objects.get(user=user, id=id)
+        except Favorite.DoesNotExist:
+            return _redirect_home_with_msg(request, "Invalid favorite chosen")
+        ftype, fromS, viaS = fav.ftype, fav.fromS, fav.viaS
+        if ftype == DEPARTURES:
+            return _handleDepartures(request, fromS=fromS, viaS=viaS, favId=id)
+
 def loginAction(request):
     """
     Method to handle login/register request.
