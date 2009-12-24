@@ -11,6 +11,7 @@ import urllib2
 from cookielib import CookieJar
 import xml.dom.minidom
 from xml2dict import fromstring
+from datetime import datetime
 
 from settings import *
 from requests import *
@@ -183,30 +184,56 @@ class nationalrail:
         @param ret_time: Optional Return journey as datetime object.
         """
         # Outward journey
-        ojday = '24/12/2009'
-        ojmonth = 'December'
-        ojhour = '18'
-        ojmin = '00'
+        if not out_time:
+            print "Out time is mandatory"
+            sys.exit(1)
+        ojday = out_time.strftime('%d/%m/%Y')
+        ojmonth = out_time.strftime('%B')
+        ojhour = out_time.strftime('%H')
+        ojmin = out_time.strftime('%M')
+        jpstate = 'singleAdvanced'
         
         # Return journey
         rjday = ''
         rjmonth = ''
         rjhour = ''
         rjmin = ''
+        if ret_time:
+            rjday = ret_time.strftime('%d/%m/%Y')
+            rjmonth = ret_time.strftime('%B')
+            rjhour = ret_time.strftime('%H')
+            rjmin = ret_time.strftime('%M')
+            jpstate = 'return'
         url = JOURNEY_PLANNER_HTTP_URL
         host = JOURNEY_PLANNER_HOST
         response = doFormSubmit("journeyPlanner", locals())
         dep_options, ret_options = _parseJPData(response)
-        
+        return {'OutwardJourney' : dep_options, 
+                'ReturnJourney' : ret_options}
+
 def _parseJPData(response):
+    """
+    Journey planner html would contain two table sections
+    for outward and return journey.
+    """
+    dep_options = None
+    ret_options = None
+    soup = BeautifulSoup(response)
+    for soup in soup.findAll('tr', {"class" : "first"}):
+        if soup:
+            soup = soup.parent
+            if not dep_options:
+                dep_options = _doJPParse(soup)
+                continue
+            ret_options = _doJPParse(soup)
+    return dep_options, ret_options
+
+def _doJPParse(soup):
     """
     Ugly method which parses journey planner html
     and tries to extract useful information. Who said scraping is easy.
     """
-    soup = BeautifulSoup(response)
-    dep_options = []
-    ret_options = []
-    soup = soup.find('tr', {"class" : "first"}).parent
+    joptions = []
     for row in soup.findAll('tr', recursive=False):
         # Skip changes section since it gets handled below.
         if row['class'] == 'changes':
@@ -240,13 +267,12 @@ def _parseJPData(response):
                 row1 = row1.findNext('td')
                 change['arriving'] = row1.contents[0].strip()
                 changes.append(change)
-            service['changes'] = changes    
+            service['changes'] = changes
         row = row.findNext('td') # Skip the alert icon
         row = row.findNext('td')
         service['platform'] = row.contents[0].replace('-', '').strip()
-        dep_options.append(service)
-        print service
-    return dep_options, ret_options
+        joptions.append(service)
+    return joptions
 
 def main():
     rail = nationalrail()
@@ -256,7 +282,10 @@ def main():
     print rail.arrivalsAndDeparture(crs="PAD")
     print rail.retrieveCRS(station_name="reading")
     """
-    rail.journeyPlanner(fromCrs='PAD', toCrs='HAY', viaCrs='STL')
+    dt = datetime.now()
+    dt = dt.replace(day=dt.date().day + 2, hour=18, minute=0)
+    dt1 = dt.replace(day=dt.date().day + 3, hour=10, minute=0)
+    print rail.journeyPlanner(fromCrs='PAD', toCrs='HAY', viaCrs='', out_time=dt, ret_time=dt1)
 
 if __name__ == '__main__':
     main()

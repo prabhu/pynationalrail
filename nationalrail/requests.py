@@ -58,7 +58,7 @@ SERVICE_REQUEST = """
 JOURNEY_PLANNER_HTTP_REQUEST = {
     'from.searchTerm' : '%(fromCrs)s',
     'to.searchTerm' : '%(toCrs)s',
-    'jpState' : 'singleAdvanced',
+    'jpState' : '%(jpstate)s',
     'commandName' : 'journeyPlannerCommand',
     'timeOfOutwardJourney.arrivalOrDeparture' : 'DEPART',
     'timeOfOutwardJourney.monthDay' : '%(ojday)s',
