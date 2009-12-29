@@ -13,6 +13,7 @@ import sys, os
 import urllib2, pickle
 from BeautifulSoup import BeautifulSoup
 import sqlite3
+from config import *
 
 # Headers for spoofing Firefox
 HEADERS = {

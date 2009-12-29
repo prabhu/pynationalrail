@@ -13,7 +13,7 @@ import xml.dom.minidom
 from xml2dict import fromstring
 from datetime import datetime
 
-from requests import *
+from config import *
 from crs import *
 
 __VERSION__ = "1.0"
