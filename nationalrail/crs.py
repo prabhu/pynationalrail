@@ -12,7 +12,6 @@ Author: Prabhu Subramanian
 import sys, os
 import urllib2, pickle
 from BeautifulSoup import BeautifulSoup
-from settings import *
 import sqlite3
 
 # Headers for spoofing Firefox

@@ -13,7 +13,6 @@ import xml.dom.minidom
 from xml2dict import fromstring
 from datetime import datetime
 
-from settings import *
 from requests import *
 from crs import *
 
