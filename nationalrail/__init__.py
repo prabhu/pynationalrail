@@ -45,10 +45,10 @@ def _doPOST(action=None, extra_headers=None, args=None, url=API_URL, host=HOST):
         resp = opener.open(request)
         return resp.read()
     except urllib2.HTTPError, e:
-        print "National Rail servers having some trouble - ", e
+        print >> sys.stderr, "National Rail servers having some trouble - ", e
         raise e
     except urllib2.URLError, e:
-        print "National Rail servers having some trouble - ", e
+        print >> sys.stderr, "National Rail servers having some trouble - ", e
         raise e
 
 
