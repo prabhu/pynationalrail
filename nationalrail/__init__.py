@@ -35,17 +35,22 @@ def _doPOST(action=None, extra_headers=None, args=None, url=API_URL, host=HOST):
         headers.update(extra_headers)
     
     request = urllib2.Request(url, body, headers)
-    response = urllib2.urlopen(request)
-    cookies = CookieJar()
-    cookies.extract_cookies(response, request)
-    cookie_handler= urllib2.HTTPCookieProcessor( cookies )
-    redirect_handler= urllib2.HTTPRedirectHandler()
-    opener = urllib2.build_opener(redirect_handler, cookie_handler)
     try:
+        response = urllib2.urlopen(request)
+        cookies = CookieJar()
+        cookies.extract_cookies(response, request)
+        cookie_handler= urllib2.HTTPCookieProcessor( cookies )
+        redirect_handler= urllib2.HTTPRedirectHandler()
+        opener = urllib2.build_opener(redirect_handler, cookie_handler)
         resp = opener.open(request)
+        return resp.read()
     except urllib2.HTTPError, e:
         print "National Rail servers having some trouble - ", e
-    return resp.read()
+        raise e
+    except urllib2.URLError, e:
+        print "National Rail servers having some trouble - ", e
+        raise e
+
 
 def doSoapCall(soapAction, args):
     """
@@ -207,7 +212,7 @@ class nationalrail:
         host = JOURNEY_PLANNER_HOST
         response = doFormSubmit("journeyPlanner", locals())
         dep_options, ret_options = _parseJPData(response)
-        return {'OutwardJourney' : dep_options, 
+        return {'OutwardJourney' : dep_options,
                 'ReturnJourney' : ret_options}
 
 def _parseJPData(response):
