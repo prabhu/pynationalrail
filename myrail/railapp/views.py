@@ -16,21 +16,30 @@ def _defaults(request):
     """
     Method to return default values to templates.
     """
-    loggedIn = False
+    loggedIn = _checkLoggedIn(request)
     username = 'Guest'
     favs = None
-    if getattr(request, 'user'):
+    if loggedIn:
         user = request.user
-        if not user.is_anonymous():
-            username = request.user.username
-            loggedIn = True
-            favs = Favorite.objects.filter(user=user)[:6]
+        username = request.user.username
+        favs = Favorite.objects.filter(user=user)[:6]
     d_fromS = 'Paddington'
     d_viaS = ''
     if LAST_SEARCH_COOKIE in request.COOKIES:
         if request.COOKIES[LAST_SEARCH_COOKIE]:
             d_fromS, d_viaS = request.COOKIES[LAST_SEARCH_COOKIE].split("|")
     return locals()
+
+def _checkLoggedIn(request):
+    """
+    Method to determine if the user is logged in.
+    """
+    loggedIn = False
+    if getattr(request, 'user'):
+        user = request.user
+        if not user.is_anonymous():
+            loggedIn = True
+    return loggedIn
 
 def _redirect_home_with_msg(request, msg):
     """
@@ -188,6 +197,7 @@ def service(request):
                               },
                               context_instance=RequestContext(request))
 
+@debugger
 def favorites(request):
     """
     Method which handles favorites request
@@ -228,17 +238,17 @@ def favorites(request):
         
         # Construct a good favorite name
         fname = fsn + ' ' + ftype
+        desc = ''
         if vsn:
-            fname += ' via ' + vsn
+            desc = 'Via ' + vsn
         
         # See if the user is logged in.
-        loggedIn = False
-        if getattr(request, 'user'):
-            loggedIn = True
+        loggedIn = _checkLoggedIn(request)
         return render_to_response('fav.html', {'fname' : fname,
                                 'fromS' : fromS,
                                 'viaS' : viaS,
                                 'ftype' : ftype,
+                                'desc' : desc,
                                 'loggedIn' : loggedIn,
                                 },
                                 context_instance=RequestContext(request))
@@ -249,28 +259,33 @@ def favorites(request):
         viaS = p.get('viaS', None)
         ftype = p.get('type', 'Departures')
         fname = p.get('fname', None)
+        desc = p.get('desc', '')
         if not fname or not fromS:
             return _redirect_home_with_msg(request, "Missing values. Favorite not saved.")
         
         # Retrieve or create the user.
         username = p.get('username', None)
         password = p.get('password', None)
-        user = None
-        try:
-            if getattr(request, 'user'):
-                user = request.user
-            if not user:
-                user = User.objects.get(username=username, password=password)
-            else:
-                username, password = user.username, user.password
+        loggedIn = _checkLoggedIn(request)
+        
+        if not loggedIn:
             if not username or not password or username.strip() == '' or password.strip() == '':
                 return _redirect_home_with_msg(request, "Cannot save favorite without registering.")
-        except User.DoesNotExist:
-            # Create the user and login
-            user = create_user(request, username, password)
-            user = authenticate(username=username, password=password)
-            login(request, user)
-        fav = Favorite(user=user, fname=fname,
+        
+        user = None
+        if getattr(request, 'user'):
+            user = request.user
+        if not user or user.is_anonymous():
+            try:
+                user = User.objects.get(username=username, password=password)
+            except User.DoesNotExist:
+                # Create the user and login
+                user = create_user(request, username, password)
+                user = authenticate(username=username, password=password)
+                login(request, user)
+
+        # Go ahead and save the favorite
+        fav = Favorite(user=user, fname=fname, desc=desc,
                        ftype=ftype, fromS=fromS, viaS=viaS)
         fav.save()
         return _redirect_home_with_msg(request, "Favorite saved.")

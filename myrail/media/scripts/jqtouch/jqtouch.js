@@ -437,6 +437,7 @@
             {
                 $.ajax({
                     url: href,
+                    cache: false,
                     data: settings.data,
                     type: settings.method,
                     success: function (data, textStatus) {
