@@ -1,3 +1,4 @@
+{% load rail_tags %}
 <div id="dep" class="current">
     <div class="toolbar">
         <h1>{{ location|safe }} departures</h1>
@@ -6,7 +7,7 @@
     <ul class="metal">
         {% if services %}
         {% for service in services %}
-        <li class="arrow"><a href="/s?id={{ service.serviceID|safe }}&amp;crs={{ crs }}">{{ service.std }}
+        <li class="arrow"><a href="{% service_link service crs nextService %}">{{ service.std }}
         {% ifnotequal service.etd "On time" %}
         {% ifnotequal service.etd "Starts here" %}
         {% ifnotequal service.etd "No report" %}
@@ -30,7 +31,7 @@
             <a href="/f/?a=d&id={{ favId }}">Remove Favorite</a>
             {% endif %}
             </li>
-        <li><a href="#">Later Trains</a></li>
+        <li><a href="/d/?fromS={{ crs }}&viaS={{ filterCrs }}">Reload</a></li>
     </ul>
     <div class="info">
         <p>Details as of {{ asof }}</p>

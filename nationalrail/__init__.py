@@ -89,9 +89,12 @@ def parseXml(ixml, tagName):
     @param tagName: Tag name to look for in the xml
     """
     doc = xml.dom.minidom.parseString(ixml)
-    response = doc.getElementsByTagName(tagName)[0].toxml()
-    return fromstring(response)
-
+    if doc:
+        doc = doc.getElementsByTagName(tagName)
+        if doc:
+            return fromstring(doc[0].toxml())
+    return None
+    
 class nationalrail:
     
     # Decorators

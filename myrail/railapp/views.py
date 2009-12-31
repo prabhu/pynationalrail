@@ -94,13 +94,16 @@ def app_default(request):
 @debugger
 def departures(request):
     """
-    Method which handles searches for departures.
+    Method which handles searches for departures
+        - supports both GET and POST
     """
     if request.POST:
         p = request.POST
-        fromS = p.get('fromS', None)
-        viaS = p.get('viaS', None)
-        return _handleDepartures(request, fromS=fromS, viaS=viaS)
+    if request.GET:
+        p = request.GET
+    fromS = p.get('fromS', None)
+    viaS = p.get('viaS', None)
+    return _handleDepartures(request, fromS=fromS, viaS=viaS)
 
 def _handleDepartures(request, fromS=None, viaS=None, favId=None):
     """
@@ -147,7 +150,16 @@ def _handleDepartures(request, fromS=None, viaS=None, favId=None):
     dtime = dt[1].split('.')[0]
     asof = dt[0] + " " + dtime
     location = deps.GetDepartureBoardResult.locationName
+    # Build next service dict
+    nextService = {}
+    prevService = None
+    if services:
+        for service in services:
+            if prevService:
+                nextService[prevService] = service.serviceID
+            prevService = service.serviceID        
     response = render_to_response('dep.html', {'services' : services,
+                          'nextService' : nextService,
                           'location' : location,
                           'crs' : crs,
                           'filterCrs' : filterCrs,
@@ -165,6 +177,7 @@ def arrivals(request):
     return render_to_response('arr.html', locals(),
                               context_instance=RequestContext(request))
 
+@debugger
 def service(request):
     """
     Method which handles service details request.
@@ -173,11 +186,15 @@ def service(request):
         p = request.GET
         sid = p.get('id', None)
         crs = p.get('crs', None)
+        nid = p.get('nid', None)
         if not sid:
             error_msg = "Invalid train details. Start again"
             return _redirect_home_with_msg(request, error_msg)
         rail = nr()
         resp = rail.serviceDetails(sid)
+        if not resp:
+            return render_to_response('ser.html', {'error' : true}, context_instance=RequestContext(request))
+            
         sdetails = resp.GetServiceDetailsResult
         dt = sdetails.generatedAt.split('T')
         dtime = dt[1].split('.')[0]
@@ -194,6 +211,9 @@ def service(request):
                               'disruptionReason' : disruptionReason,
                               'eta' : eta,
                               'etd' : etd,
+                              'id' : sid,
+                              'crs' : crs,
+                              'nid' : nid,
                               },
                               context_instance=RequestContext(request))
 
@@ -283,7 +303,7 @@ def favorites(request):
                 user = create_user(request, username, password)
                 user = authenticate(username=username, password=password)
                 login(request, user)
-
+        
         # Go ahead and save the favorite
         fav = Favorite(user=user, fname=fname, desc=desc,
                        ftype=ftype, fromS=fromS, viaS=viaS)

@@ -4,6 +4,9 @@
         <a href="#" class="button back">Departures</a>
     </div>
     <ul class="metal">
+        {% if error %}
+        <li class="creason">Unable to retrieve any details for this service.</li>
+        {%else %}
         {% if isCancelled %}
             <li class="creason">{{ disruptionReason|safe }}</li>
         {% else %}
@@ -39,11 +42,20 @@
             <li class="sstation">{{ cp.locationName|safe }}<em>{{ cp.st }}</em></li>
         {% endfor %}
         {% endif %}
-        {% endif %}       
+        {% endif %}
+        {% endif %}
     </ul>
     <ul class="individual">
-        <li><a href="#">Reload</a></li>
-        <li><a href="#">Next Train</a></li>
+        {% if error %}
+        <li><a href="/">Home</a></li>        
+        {% else %}
+        <li><a href="/s/?id={{ id|safe }}&crs={{ crs }}">Reload</a></li>
+        {% endif %}
+        {% if not nid %}
+        <li><a href="/">Home</a></li>
+        {% else %}
+        <li><a href="/s/?id={{ nid|safe }}&crs={{ crs }}">Next Train</a></li>
+        {% endif %}
     </ul>
     <div class="info">
         <p>Details as of {{ asof }}</p>
