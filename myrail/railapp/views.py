@@ -72,10 +72,10 @@ def _expandCommon(station):
     Method to expand common acronyms like north, south
     """
     REP = {
-        'n' : 'north',
-        's' : 'south',
-        'e' : 'east',
-        'w' : 'west',
+        '[Nn]' : 'north',
+        '[Ss]' : 'south',
+        '[Ee]' : 'east',
+        '[Ww]' : 'west',
     }
     for k,v in REP.items():
         station = re.sub('^' + k + '\s', v + ' ', station)

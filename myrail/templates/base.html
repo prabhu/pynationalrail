@@ -14,7 +14,32 @@
                 addGlossToIcon: false,
                 fullScreen: true,
                 statusBar: 'black',
-            });            
+            });
+            
+            function swapStation() {
+                var fromS = $('#fromS').val();
+                var viaS = $('#viaS').val();
+                $('#fromS').val(viaS);
+                $('#viaS').val(fromS);
+            }
+            
+            var fromSSelected = false;
+            function handleShortcut(stationName) {
+                if (!fromSSelected) {
+                    if (stationName === $('#viaS').val()) {
+                        return;
+                    }
+                    $('#fromS').val(stationName);
+                    fromSSelected = true;
+                } else {
+                    if (stationName === $('#fromS').val()) {
+                        return;
+                    }
+                    $('#viaS').val(stationName);
+                    fromSSelected = false;
+                }
+            }
+            
     </script>
     <style type="text/css" media="screen">
         body.fullscreen #home .info {
@@ -72,6 +97,20 @@
             color: #444;
             font-size: 12px;
         }
+        
+        li.links a {
+            color: #444;
+            font: normal normal normal 14px/normal Helvetica;
+            margin: 0 25px 0 0;
+            padding: 0;
+            display: inline;
+        }
+        
+        li.links a:hover {
+            background: rgb(51, 102, 204);
+            color: white;
+        }
+        
     </style>
 </head>
 <body>
@@ -120,6 +159,9 @@
                 {% block fromBlock %}
                 <li><label for="fromS">From</label><input type="text" name="fromS" id="fromS" value="{{ d_fromS|safe }}" placeholder="Part of station name or short code" /></li>
                 {% endblock %}
+                <li class="links"><a href="javascript:handleShortcut('W dray');">W dray</a><a href="javascript:handleShortcut('Hayes');">Hayes</a><a href="javascript:handleShortcut('Ealing');">Ealing</a>
+                <a href="javascript:handleShortcut('Pad');">Pad</a>
+                    </li>
                 {% block viaBlock %}
                 <li><label for="viaS">Via</label><input type="text" name="viaS" id="viaS" value="{{ d_viaS|safe }}" placeholder="Optional" /></li>
                 {% endblock %}
@@ -144,7 +186,7 @@
                 <a href="http://www.nationalrail.co.uk" target="_blank">National Rail Website</a>
             {% endif %}
             </li>
-            <li><a href="#">Advanced</a></li>
+            <li><a href="javascript:swapStation();">Swap</a></li>
         </ul>
         <div class="info">
             <p>Copyright 2010 Prabhu Subramanian. Not affiliated with National Rail.</p>

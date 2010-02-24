@@ -286,6 +286,11 @@
                 return true;
             }
             
+            // Ignore javascript: links
+            if ($el.attr('href').indexOf("javascript:") === 0) {
+                return true;
+            }
+            
             // Figure out the animation to use
             for (var i = animations.length - 1; i >= 0; i--){
                 if ($el.is(animations[i].selector)) {
@@ -422,7 +427,7 @@
                 return false;
             }
         }
-        function showPageByHref(href, options) {
+        function showPageByHref(href, options) {            
             var defaults = {
                 data: null,
                 method: 'GET',
@@ -437,7 +442,6 @@
             {
                 $.ajax({
                     url: href,
-                    cache: false,
                     data: settings.data,
                     type: settings.method,
                     success: function (data, textStatus) {
