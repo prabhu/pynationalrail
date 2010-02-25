@@ -119,22 +119,25 @@ def _handleDepartures(request, fromS=None, viaS=None, favId=None):
     if not crslist:
         error_msg = "cannot recognise station name"
         return _redirect_home_with_msg(request, error_msg)
+    if crslist and len(crslist) == 1:
+        fromS, crs = crslist[0]
+        crslist = []
     filterCrslist = _getCRS(viaS)
+    if filterCrslist and len(filterCrslist) == 1:
+        viaS, filterCrs = filterCrslist[0]
+        filterCrslist = []
     
     # If multiple CRS are returned, then redirect to the
     # modified search page that shows list
-    if len(crslist) > 1 or (filterCrslist and len(filterCrslist)) > 1:
+    if len(crslist) > 1 or (filterCrslist and len(filterCrslist) > 1):
         args = {'crslist' : crslist,
                 'filterCrslist' : filterCrslist,
+                'fromS' : fromS,
+                'viaS' : viaS,
                 }
         args.update(_defaults(request))
         return render_to_response('multi.html', args,
                                  context_instance=RequestContext(request))
-    filterCrs = ""
-    fsn, crs = crslist[0]
-    vsn = ''
-    if filterCrslist:
-        vsn, filterCrs = filterCrslist[0]
     rail = nr()
     deps = rail.departures(crs=crs, filterCrs=filterCrs)
     
@@ -167,7 +170,7 @@ def _handleDepartures(request, fromS=None, viaS=None, favId=None):
                           'favId' : favId,
                           'asof' : asof},
                           context_instance=RequestContext(request))
-    response.set_cookie(LAST_SEARCH_COOKIE, fsn + "|" + vsn)
+    response.set_cookie(LAST_SEARCH_COOKIE, fromS + "|" + viaS)
     return response
 
 def arrivals(request):

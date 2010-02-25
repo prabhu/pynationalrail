@@ -60,7 +60,7 @@ def getCRS(station_name=None, crs=None, autoCreate=True):
     if station_name:
         c.execute('SELECT * from crstab where station_name like "%%%s%%"' %station_name.lower())
     elif crs:
-        c.execute('SELECT * from crstab where crs like "%%%s%%"' %crs.lower())
+        c.execute('SELECT * from crstab where crs = "%s"' %crs.lower())
     else:
         return None
     ret = c.fetchall()
