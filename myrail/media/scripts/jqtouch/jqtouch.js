@@ -308,7 +308,7 @@
                 goBack(hash);
             }
             // Branch on internal or external href
-            else if (hash && hash!='#') {
+            else if (hash && hash != '#') {
                 $el.addClass('active');
                 goTo($(hash).data('referrer', $el), animation);
             } else {
@@ -599,7 +599,7 @@
             }
         }
         $.fn.makeActive = function(){
-            return $(this).addClass('active');
+            //return $(this).addClass('active');
         }
         $.fn.swipe = function(fn) {
             if ($.isFunction(fn))
